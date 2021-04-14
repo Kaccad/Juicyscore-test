@@ -6,13 +6,9 @@
  */
 
 class EventModule {
-  async start(scope, readinessCallback) {
-    throw new Error("Need to implement method");
-  }
+  async start(scope, readinessCallback) {}
 
-  async stop() {
-    throw new Error("Need to implement method");
-  }
+  async stop(scope) {}
 }
 
 class ExecModule {
@@ -20,9 +16,7 @@ class ExecModule {
    * @param {GlobalScope} scope
    * @return {Promise<{}>}
    */
-  async exec(scope) {
-    throw new Error("Need to implement method");
-  }
+  async exec(scope) {}
 }
 
 class Queue {
@@ -73,7 +67,7 @@ class Queue {
     for (let i = 0; i < count; i++) {
       if (this.queue[i].queuedId) {
         if (this.queue[i].module instanceof EventModule) {
-          this.queue[i].module.stop();
+          this.queue[i].module.stop(this.scope);
         }
         clearTimeout(this.queue[i].queuedId);
       }
@@ -83,13 +77,20 @@ class Queue {
 
 class CopyPasteEventModule extends EventModule {
   async start(scope, readinessCallback) {
-    // this method need to be implemented
-    // when event has happened readinessCallback need to be called with detected events
+    const { win } = scope;
+
+    win.addEventListener('paste', readinessCallback);
+    win.addEventListener('copy', readinessCallback);
+
     return super.start(scope, readinessCallback);
   }
 
-  async stop() {
-    // this method need to be implemented
+  async stop(scope) {
+    const { win } = scope;
+
+    win.removeEventListener('paste', readinessCallback);
+    win.removeEventListener('copy', readinessCallback);
+
     return super.stop();
   }
 }
